@@ -11,9 +11,9 @@ class Extractor(HTMLParser):
         super().__init__(html_text, detect_encoding=detect_encoding,
                          use_meta_tags=use_meta_tags,
                          decode_errors=decode_errors)
-        self.tag_dict = {'meta_title': 'meta[property="og:title"]',
-                         'meta_description': 'meta[property="og:description"]',
-                         'meta_keywords': 'meta[property="og:keywords"]',
+        self.tag_dict = {'meta_title': 'meta[name="title"]',
+                         'meta_description': 'meta[name="description"]',
+                         'meta_keywords': 'meta[name="keywords"]',
                          'h1': 'h1',
                          'h2': 'h2',
                          'h3': 'h3',
