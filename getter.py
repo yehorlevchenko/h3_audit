@@ -46,7 +46,8 @@ class Getter:
 
 
 if __name__ == "__main__":
-    url_list = ['https://www.python.org']
+    url_list = ['https://www.python.org', 'https://www.python.org/about/',
+                'https://www.python.org/doc/']
     getter = Getter()
-    res = getter._get_html(url_list)
+    res = getter.work(url_list)
     print(res)
