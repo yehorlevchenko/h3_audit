@@ -1,15 +1,20 @@
 
 
-
 class Analyzer:
     """
     1100-1119 - meta_title errors
     1120-1139 - meta_description errors
+    1140-1159 - meta_keywords errors
     """
     def __init__(self):
         pass
 
     def work(self, tag_dict):
+        """
+        Analyzes tag_dict for mistakes in coding.
+        :param tag_dict:
+        :return: dict(tag: "error_code")
+        """
         check_result_dict = dict()
         for tag, data in tag_dict.items():
             try:
@@ -29,18 +34,63 @@ class Analyzer:
             return check_result
 
         if len(data) > 1:
-            # err_msg = 'Multiple titles found on page'
+            # err_msg = 'Multiple meta titles found on page'
             check_result.append(1101)
             return check_result
 
+            # err_msg = 'Too short title'
         if len(data[0]) < 80:
             check_result.append(1110)
             return check_result
 
+            # err_msg = 'Too long title'
         elif len(data[0]) > 140:
             check_result.append(1111)
             return check_result
 
+    def _check_meta_description(self, data):
+        check_result = list()
+        if not data:
+            # err_msg = 'Missing description'
+            check_result.append(1120)
+            return check_result
+
+        if len(data) > 1:
+            # err_msg = 'Multiple meta descriptions found on page'
+            check_result.append(1121)
+            return check_result
+
+            # err_msg = 'Too short description'
+        if len(data[0]) < 50:
+            check_result.append(1130)
+            return check_result
+
+            # err_msg = 'Too long description'
+        elif len(data[0]) > 160:
+            check_result.append(1131)
+            return check_result
+
+    def _check_meta_keywords(self, data):
+        check_result = list()
+        if not data:
+            # err_msg = 'Missing keywords'
+            check_result.append(1140)
+            return check_result
+
+        if len(data) > 1:
+            # err_msg = 'Multiple meta keywords found on page'
+            check_result.append(1141)
+            return check_result
+
+            # err_msg = 'Not enough keywords'
+        if len(data[0].split(" ")) < 3:
+            check_result.append(1150)
+            return check_result
+
+            # err_msg = 'Too much keywords'
+        elif len(data[0].split(" ")) > 10:
+            check_result.append(1151)
+            return check_result
 
 if __name__ == '__main__':
     from .extractor import Extractor
