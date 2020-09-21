@@ -21,7 +21,7 @@ class Analyzer:
                     check_result_dict[tag] = check(data)
         return check_result_dict
 
-    def _check_meta_title(self, data):
+    def _check_title(self, data):
         check_result = list()
         if not data:
             # err_msg = 'Missing title'
