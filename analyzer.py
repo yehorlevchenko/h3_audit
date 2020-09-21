@@ -1,11 +1,10 @@
-
-
-
 class Analyzer:
     """
     1100-1119 - meta_title errors
     1120-1139 - meta_description errors
+    1140-1159 - meta_keywords errors
     """
+
     def __init__(self):
         pass
 
@@ -39,6 +38,48 @@ class Analyzer:
 
         elif len(data[0]) > 140:
             check_result.append(1111)
+            return check_result
+
+    def _check_meta_description(self, data):
+        check_result = list()
+
+        if not data:
+            # err_msg = 'Missing description'
+            check_result.append(1120)
+            return check_result
+
+        if len(data) > 1:
+            # err_msg = 'Multiple description found on page'
+            check_result.append(1121)
+            return check_result
+
+        if len(data[0]) < 50:
+            # err_msg = 'Description data is short'
+            check_result.append(1125)
+            return check_result
+
+        elif len(data[0]) > 160:
+            # err_msg = 'Description data is long'
+            check_result.append(1126)
+            return check_result
+
+    def _check_meta_keywords(self, data):
+        check_result = list()
+
+        if not data:
+            # err_msg = 'Missing keywords'
+            check_result.append(1140)
+            return check_result
+
+        if len(data[0].split('')) < 3:
+            # err_msg = 'Few keywords'
+            check_result.append(1145)
+            return check_result
+
+        elif len(data[0].split('')) > 10:
+            # err_msg = 'Too much keywords'
+
+            check_result.append(1146)
             return check_result
 
 
