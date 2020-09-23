@@ -39,9 +39,7 @@ class Extractor:
     def _clear_a(self, a_list):
         unique_a = set()
         # whitelist = ['/', './', 'https://', 'http://', 'ftp://']
-        # TODO: THIS PATTERN MATCHES ABSOLUTE LINKS, SHOULD ALSO MATCH RELATIVE
-        # TODO: PATTERN SHOULD NOT MATCH RELATIVE LINKS STARTING WITH //
-        pattern = '/?https?:\/\/w{0,3}\w*?\.(\w*?\.)?\w{2,3}\S*|www\.(\w*?\.)?\w*?\.\w{2,3}\S*|(\w*?\.)?\w*?\.\w{2,3}[\/\?]\S*/'
+        pattern = '/?(ht|f)tps?:\/\/w{0,3}\w*?\.(\w*?\.)?\w{2,3}\S*|www\.(\w*?\.)?\w*?\.\w{2,3}\S*|(\w*?\.)?\w*?\.\w{2,3}[\/\?]\S*/|^(?!\/\/|www\.)\/?(?=\w)(\w+\/{1})*(\w+\.\w+)*'
 
         for tag in a_list:
             href = tag.get('href')
@@ -59,5 +57,5 @@ if __name__ == "__main__":
                    '(KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36'}
     response = requests.get('https://www.python.org', headers=headers)
     # print(response.text)
-    extractor = Extractor(response.text)
-    print(extractor.work())
+    extractor = Extractor()
+    print(extractor.work(response.text))
