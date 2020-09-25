@@ -39,7 +39,7 @@ class Extractor:
     def _clear_a(self, a_list):
         unique_a = set()
         # whitelist = ['/', './', 'https://', 'http://', 'ftp://']
-        pattern = '(^\.\/)|(^\/(?!\/))|(^http:\/\/(?!\/)|https:\/\/(?!\/))|(^w{3}\.)'
+        pattern = '(^\.\/)\w|(^\/(?!\/))\w|(^(ht|f)tps?:\/\/(?!\/))|(^\w{3}\.)'
         for tag in a_list:
             href = tag.get('href')
             check = re.match(pattern, href)
