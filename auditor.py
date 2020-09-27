@@ -1,3 +1,5 @@
+import threading
+
 import rabbitpy
 import json
 
@@ -15,14 +17,18 @@ class Auditor:
     def run(self):
         for message in rabbitpy.consume('amqp://localhost:5672', 'audit_start'):
             in_data = json.loads(message.body.decode('utf8'))
-            result = self.work(in_data['url_list'])
-            message.ack()
-            print(result)
+            if isinstance(in_data['url_list'], str):
+                in_data['url_list'] = list(in_data['url_list'])
+                thread_amount = 3
+                # Slicing data into list(list() * thread_amount)
+                data_sliced = [in_data['url_list'][i::thread_amount] for i in range(thread_amount)]
+                for urls in data_sliced:
+                    thread = threading.Thread(target=self.work, args=urls)
+                    thread.start()
+                    message.ack()
+
 
     def work(self, url_list):
-        if isinstance(url_list, str):
-            url_list = [url_list]
-
         raw_page_list = self.getter.work(url_list)
         for raw_page_data in raw_page_list:
             if raw_page_data['status_code'] == 200:
