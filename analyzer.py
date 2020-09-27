@@ -92,6 +92,7 @@ class Analyzer:
             check_result.append(1151)
             return check_result
 
+
 if __name__ == '__main__':
     from extractor import Extractor
 
