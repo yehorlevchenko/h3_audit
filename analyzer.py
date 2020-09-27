@@ -48,7 +48,7 @@ class Analyzer:
             check_result.append(1111)
             return check_result
 
-    def _check_meta_description(self, data):
+    def _check_description(self, data):
         check_result = list()
         if not data:
             # err_msg = 'Missing description'
@@ -70,7 +70,7 @@ class Analyzer:
             check_result.append(1131)
             return check_result
 
-    def _check_meta_keywords(self, data):
+    def _check_keywords(self, data):
         check_result = list()
         if not data:
             # err_msg = 'Missing keywords'
@@ -93,7 +93,7 @@ class Analyzer:
             return check_result
 
 if __name__ == '__main__':
-    from .extractor import Extractor
+    from extractor import Extractor
 
     html = """
     <!doctype html>
@@ -1157,8 +1157,8 @@ if __name__ == '__main__':
     </body>
     </html>
         """
-    extractor = Extractor(html)
-    tags = extractor.find_all()
+    extractor = Extractor()
+    tags = extractor.work(html)
 
     analyzer = Analyzer()
-    result = analyzer.work()
+    result = analyzer.work(tags)
