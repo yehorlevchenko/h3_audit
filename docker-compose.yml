@@ -10,3 +10,13 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+  PostgreSQL:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    hostname: localhost
+    volumes:
+      - ./postgresql/data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
