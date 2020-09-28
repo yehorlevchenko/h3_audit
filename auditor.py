@@ -13,11 +13,16 @@ class Auditor:
         self.analyzer = Analyzer()
 
     def run(self):
-        for message in rabbitpy.consume('amqp://localhost:5672', 'audit_start'):
-            in_data = json.loads(message.body.decode('utf8'))
-            result = self.work(in_data['url_list'])
-            message.ack()
-            print(result)
+        with rabbitpy.Connection('amqp://localhost:5672') as connection:
+            with connection.channel() as channel:
+                queue = rabbitpy.Queue(channel, 'audit_start')
+                for message in queue.consume():
+                    # TODO: add try\except and publosh broken messages to
+                    #  audit_error queue
+                    in_data = json.loads(message.body.decode('utf8'))
+                    result = self.work(in_data['url_list'])
+                    self.finish_task(channel, in_data, result)
+                    message.ack()
 
     def work(self, url_list):
         if isinstance(url_list, str):
@@ -30,6 +35,16 @@ class Auditor:
                 results = self.analyzer.work(raw_tags)
                 return results
 
+    def finish_task(self, channel, task_data, result_data):
+        # task_data = {"audit_id": 1, "main_url": "http://python.org", "url_list": ["http://python.org"]}
+        # result_data = {'title': [1110], 'description': None, 'keywords': [1151], 'h1': [1161], 'h2': None, 'h3': [1180]}
+        task_data.pop('url_list')
+        result_data.update(task_data)
+        final_message = rabbitpy.Message(
+            channel=channel,
+            body_value=result_data
+        )
+        final_message.publish(exchange="audit", routing_key="audit_finish")
 
 
 
