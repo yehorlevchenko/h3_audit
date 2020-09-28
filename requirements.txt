@@ -5,6 +5,7 @@ chardet==3.0.4
 idna==2.10
 lxml==4.5.2
 pamqp==2.3.0
+psycopg2-binary==2.8.6
 rabbitpy==2.0.1
 requests==2.24.0
 selectolax==0.2.7
