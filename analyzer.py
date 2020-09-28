@@ -2,9 +2,9 @@
 
 class Analyzer:
     """
-    1100-1119 - meta_title errors
-    1120-1139 - meta_description errors
-    1140-1159 - meta_keywords errors
+    1100-1119 - title errors
+    1120-1139 - description errors
+    1140-1159 - keywords errors
     """
     def __init__(self):
         pass
