@@ -2,9 +2,12 @@
 
 class Analyzer:
     """
-    1100-1119 - meta_title errors
-    1120-1139 - meta_description errors
-    1140-1159 - meta_keywords errors
+    1100-1119 - title errors
+    1120-1139 - description errors
+    1140-1159 - keywords errors
+    1160-1169 - h1 errors
+    1170-1179 - h2 errors
+    1180-1189 - h3 errors
     """
     def __init__(self):
         pass
@@ -17,13 +20,16 @@ class Analyzer:
         """
         check_result_dict = dict()
         for tag, data in tag_dict.items():
-            try:
-                check = getattr(self, f'_check_{tag}')
-            except AttributeError:
-                print(f'Unknown check: _check_{tag}')
+            if tag == 'a':
+                continue
             else:
-                if callable(check):
-                    check_result_dict[tag] = check(data)
+                try:
+                    check = getattr(self, f'_check_{tag}')
+                except AttributeError:
+                    print(f'Unknown check: _check_{tag}')
+                else:
+                    if callable(check):
+                        check_result_dict[tag] = check(data)
         return check_result_dict
 
     def _check_title(self, data):
@@ -48,7 +54,7 @@ class Analyzer:
             check_result.append(1111)
             return check_result
 
-    def _check_meta_description(self, data):
+    def _check_description(self, data):
         check_result = list()
         if not data:
             # err_msg = 'Missing description'
@@ -70,10 +76,10 @@ class Analyzer:
             check_result.append(1131)
             return check_result
 
-    def _check_meta_keywords(self, data):
+    def _check_keywords(self, data):
+        # err_msg = 'Missing keywords'
         check_result = list()
         if not data:
-            # err_msg = 'Missing keywords'
             check_result.append(1140)
             return check_result
 
@@ -82,18 +88,45 @@ class Analyzer:
             check_result.append(1141)
             return check_result
 
-            # err_msg = 'Not enough keywords'
         if len(data[0].split(" ")) < 3:
+            # err_msg = 'Not enough keywords'
             check_result.append(1150)
             return check_result
 
-            # err_msg = 'Too much keywords'
         elif len(data[0].split(" ")) > 10:
+            # err_msg = 'Too much keywords'
             check_result.append(1151)
             return check_result
 
+    def _check_h1(self, data):
+        # err_msg = 'Missing h1'
+        check_result = list()
+        if not data:
+            check_result.append(1160)
+            return check_result
+
+        if len(data) > 1:
+            # err_msg = 'Multiple h1 found on page'
+            check_result.append(1161)
+            return check_result
+
+    def _check_h2(self, data):
+        # err_msg = 'Missing h2'
+        check_result = list()
+        if not data:
+            check_result.append(1170)
+            return check_result
+
+    def _check_h3(self, data):
+        # err_msg = 'Missing h3'
+        check_result = list()
+        if not data:
+            check_result.append(1180)
+            return check_result
+
+
 if __name__ == '__main__':
-    from .extractor import Extractor
+    from extractor import Extractor
 
     html = """
     <!doctype html>
@@ -1157,8 +1190,9 @@ if __name__ == '__main__':
     </body>
     </html>
         """
-    extractor = Extractor(html)
-    tags = extractor.find_all()
+    extractor = Extractor()
+    tags = extractor.work(html)
 
     analyzer = Analyzer()
-    result = analyzer.work()
+    result = analyzer.work(tags)
+    print(result)
