@@ -2,9 +2,9 @@
 
 class Analyzer:
     """
-    1100-1119 - meta_title errors
-    1120-1139 - meta_description errors
-    1140-1159 - meta_keywords errors
+    1100-1119 - title errors
+    1120-1139 - description errors
+    1140-1159 - keywords errors
     """
     def __init__(self):
         pass
@@ -48,7 +48,7 @@ class Analyzer:
             check_result.append(1111)
             return check_result
 
-    def _check_meta_description(self, data):
+    def _check_description(self, data):
         check_result = list()
         if not data:
             # err_msg = 'Missing description'
@@ -70,7 +70,7 @@ class Analyzer:
             check_result.append(1131)
             return check_result
 
-    def _check_meta_keywords(self, data):
+    def _check_keywords(self, data):
         check_result = list()
         if not data:
             # err_msg = 'Missing keywords'
@@ -1157,8 +1157,8 @@ if __name__ == '__main__':
     </body>
     </html>
         """
-    extractor = Extractor(html)
-    tags = extractor.find_all()
+    extractor = Extractor()
+    tags = extractor.work(html)
 
     analyzer = Analyzer()
-    result = analyzer.work()
+    result = analyzer.work(tags)
