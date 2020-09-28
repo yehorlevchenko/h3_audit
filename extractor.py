@@ -9,7 +9,6 @@ class Extractor:
 
     def __init__(self):
         self.tag_dict = {'title': 'title',
-                         'meta_title': {'name': 'title'},
                          'description': {'name': 'description'},
                          'keywords': {'name': 'keywords'},
                          'h1': 'h1',
