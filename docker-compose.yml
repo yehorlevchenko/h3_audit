@@ -15,14 +15,11 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    hostname: localhost
-    volumes:
-      - ./postgresql/data:/var/lib/postgresql/data
     ports:
-      - 5432:5432
+      - "5433:5432"
   web:
     build: .
-    command: python3 manage.py runserver
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
     ports:
