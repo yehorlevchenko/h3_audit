@@ -1,5 +1,7 @@
-import rabbitpy
 import json
+import rabbitpy
+from queue import Queue
+import threading
 
 from getter import Getter
 from extractor import Extractor
@@ -13,6 +15,7 @@ class Auditor:
         self.analyzer = Analyzer()
 
     def run(self):
+        result = Queue
         with rabbitpy.Connection('amqp://localhost:5672') as connection:
             with connection.channel() as channel:
                 queue = rabbitpy.Queue(channel, 'audit_start')
@@ -20,7 +23,14 @@ class Auditor:
                     # TODO: add try\except and publosh broken messages to
                     #  audit_error queue
                     in_data = json.loads(message.body.decode('utf8'))
-                    result = self.work(in_data['url_list'])
+
+                    while True:
+                        if len(threading.enumerate()) <= 4:
+                            thread = threading.Thread(target=self.work, args=in_data['url_list'])
+                            thread.start()
+                            message.ack()
+                            break
+
                     self.finish_task(channel, in_data, result)
                     message.ack()
 
