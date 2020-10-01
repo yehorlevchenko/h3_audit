@@ -20,3 +20,12 @@ services:
       - ./postgresql/data:/var/lib/postgresql/data
     ports:
       - 5432:5432
+  web:
+    build: .
+    command: python3 manage.py runserver
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
