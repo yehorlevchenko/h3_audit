@@ -1,5 +1,6 @@
 import rabbitpy
 import json
+import threading
 
 from getter import Getter
 from extractor import Extractor
@@ -13,16 +14,17 @@ class Auditor:
         self.analyzer = Analyzer()
 
     def run(self):
-        with rabbitpy.Connection('amqp://localhost:5672') as connection:
-            with connection.channel() as channel:
-                queue = rabbitpy.Queue(channel, 'audit_start')
-                for message in queue.consume():
-                    # TODO: add try\except and publosh broken messages to
-                    #  audit_error queue
-                    in_data = json.loads(message.body.decode('utf8'))
-                    result = self.work(in_data['url_list'])
-                    self.finish_task(channel, in_data, result)
+        for message in rabbitpy.consume('amqp://localhost:5672', 'audit_start'):
+            in_data = json.loads(message.body.decode('utf8'))
+            if isinstance(in_data['url_list'], str):
+                in_data['url_list'] = list(in_data['url_list'])
+
+            while True:
+                if len(threading.enumerate()) <= 4:
+                    thread = threading.Thread(target=self.work, args=in_data['url_list'])
+                    thread.start()
                     message.ack()
+                    break
 
     def work(self, url_list):
         if isinstance(url_list, str):
