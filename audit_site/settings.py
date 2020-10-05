@@ -25,7 +25,7 @@ SECRET_KEY = 'm8x&wzk1y2h!mf_=k8j^1e=x1drz_d@_%#7a)znn8x9nb3&c-&'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', '127.0.0.1', '0.0.0.0', 'localhost']
 
 
 # Application definition
@@ -75,8 +75,12 @@ WSGI_APPLICATION = 'audit_site.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'db',
+        'PORT': 5432,
     }
 }
 
