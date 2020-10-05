@@ -12,11 +12,15 @@ services:
       - 15672:15672
   db:
     image: postgres
+    container_name: db
     environment:
+      POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
       - "5433:5432"
+    networks:
+      - djangonetwork
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
@@ -26,3 +30,9 @@ services:
       - "8000:8000"
     depends_on:
       - db
+    networks:
+      - djangonetwork
+
+networks:
+    djangonetwork:
+        driver: bridge
