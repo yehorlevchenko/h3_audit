@@ -19,7 +19,6 @@ class Auditor:
             queue = rabbitpy.Queue(channel, 'audit_start')
             with ThreadPoolExecutor(max_workers=3) as executor:
                 executor.map(self._thread_worker, queue)
-
     def work(self, url_list):
         if isinstance(url_list, str):
             url_list = [url_list]
@@ -50,7 +49,6 @@ class Auditor:
         result = self.work(in_data['url_list'])
         self.finish_task(in_data, result)
         message.ack()
-
 
 
 if __name__ == '__main__':
