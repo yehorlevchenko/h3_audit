@@ -2,9 +2,10 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 
 from .models import Audit
-from .forms import LoginForm
+from .forms import LoginForm, RegistrationForm
 
 
 def index(request):
@@ -44,3 +45,24 @@ def login_page(request):
     else:
         return render(request, template, context=context)
 
+
+def registration(request):
+    template = 'panel/registration.html'
+    context = {'form': RegistrationForm}
+
+    # registration attempt
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
+            password = form.cleaned_data.get('password')
+            confirm_password = form.cleaned_data.get('confirm_password')
+
+            if password == confirm_password:
+                user = User.objects.create_user(username, email, password)
+                user.save()
+                return render(request, 'panel/index.html')
+
+    return render(request, template, context=context)

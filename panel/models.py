@@ -7,4 +7,3 @@ class Audit(models.Model):
                                null=False, blank=False)
     owner_id = models.ForeignKey(settings.AUTH_USER_MODEL,
                                  on_delete=models.DO_NOTHING)
-
