@@ -18,11 +18,14 @@ def index(request):
 
 
 def my_audits(request):
+    # TODO: add django table library
     if request.user.is_authenticated:
-        audits = Audit.objects.filter(owner_id=2)
-        audits = "\n".join([f"{a.id} - {a.main_url}"
-                           for a in audits])
-        return HttpResponse(f"Your audits: \n{audits}")
+        audits = Audit.objects.filter(owner_id=request.user)
+        audits = [{'id': a.id, 'main_url': a.main_url} for a in audits]
+        context = {'audits': audits}
+        template = 'panel/my_audits.html'
+
+        return render(request, template, context=context)
     else:
         return redirect('login_page')
 

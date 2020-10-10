@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My audits</title>
+</head>
+<body>
+    <table>
+    <thead>
+        <tr>
+            <th>{{ user }} audits</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for audit in audits %}
+            <tr>
+                <td>{{ audit.id }}</td>
+                <td>{{ audit.main_url }}</td>
+                <td><a href= {{ dynamic_link }}>{{ audit.status }}</a></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>
