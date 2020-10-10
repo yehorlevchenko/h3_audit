@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    {{ user }}
+    {% if user.is_authenticated %}
+        <ul>
+            <li><a href="{% url 'index' %}">Create new audit</a></li>
+            <li><a href="{% url 'my_audits' %}">My audits</a></li>
+        </ul>
+    {% else %}
+        <ul>
+            <li><a href="{% url 'login_page' %}">Login</a></li>
+            <li><a href="{% url 'index' %}">Register</a></li>
+        </ul>
+    {% endif %}
+</body>
+</html>
