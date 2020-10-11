@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 
 from .models import Audit
-from .forms import LoginForm
+from .forms import LoginForm, RegisterForm
 
 
 def index(request):
@@ -43,4 +43,30 @@ def login_page(request):
     # login form
     else:
         return render(request, template, context=context)
+
+def register(request):
+    context = {}
+    template = 'panel/register.html'
+    if request.POST:
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            if user:
+                login(request, user)
+                return redirect('index')
+        else:
+            context['register_form'] = form
+            return render(request, template, context)
+    else:
+        if request.user.is_authenticated:
+            return redirect('index')
+        else:
+            form = RegisterForm()
+            context['register_form'] = form
+            return render(request, template, context)
+
+
 
