@@ -16,7 +16,7 @@ class Extractor:
                          'h3': 'h3',
                          'a': 'a'}
 
-    def work(self, raw_html):
+    def work(self, raw_html, base_url):
         """
         Collects all node lists to dict
         :return:dict(list(str))
@@ -27,7 +27,7 @@ class Extractor:
             extract_tags = soup.find_all(tag_value)
             if extract_tags:
                 if tag == 'a':
-                    result[tag] = self._clear_a(extract_tags)
+                    result[tag] = self._clear_a(extract_tags, base_url)
                 else:
                     result[tag] = [item.getText() for item in extract_tags]
             else:
@@ -35,17 +35,21 @@ class Extractor:
                 result[tag] = [item.get('content') for item in extract_tags]
         return result
 
-    def _clear_a(self, a_list):
+    def _clear_a(self, a_list, base_url):
         unique_a = set()
-        # whitelist = ['/', './', 'https://', 'http://', 'ftp://']
+        # whitelist = ['/', './', 'https://', 'http://']
         pattern = '(^\.\/)|(^\/(?!\/))|(^http:\/\/(?!\/)|https:\/\/(?!\/))|(^w{3}\.)'
         for tag in a_list:
             href = tag.get('href')
             check = re.match(pattern, href)
             if check:
                 if check.groups():
-                    unique_a.add(tag.get('href'))
-        return list(unique_a)
+                    url = tag.get('href')
+                    if not any((url.startswith('www'), url.startswith('http'))):
+                        # TODO: add case when url starts with ./
+                        url = f'{base_url}{url}'
+                    unique_a.add(url)
+        return unique_a
 
 
 if __name__ == "__main__":

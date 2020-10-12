@@ -1,5 +1,6 @@
 import rabbitpy
 import json
+from queue import SimpleQueue
 
 from getter import Getter
 from extractor import Extractor
@@ -20,25 +21,46 @@ class Auditor:
                     # TODO: add try\except and publosh broken messages to
                     #  audit_error queue
                     in_data = json.loads(message.body.decode('utf8'))
-                    result = self.work(in_data['url_list'])
+                    result = self.work(in_data)
                     self.finish_task(channel, in_data, result)
                     message.ack()
 
-    def work(self, url_list):
-        if isinstance(url_list, str):
-            url_list = [url_list]
+    def work(self, audit_data):
+        page_limit = audit_data['limit']
+        page_done_count = 0
+        start_url = audit_data['main_url']
+        result_data = list()
+        new_url_set = {start_url}
 
-        raw_page_list = self.getter.work(url_list)
-        for raw_page_data in raw_page_list:
-            if raw_page_data['status_code'] == 200:
-                raw_tags = self.extractor.work(raw_page_data['html'])
-                results = self.analyzer.work(raw_tags)
-                return results
+        if not start_url.endswith('/'):
+            start_url = f'{start_url}/'
+
+        # TODO: switch to Queue
+        for url in new_url_set:
+            page_data = self.getter.work(url)
+            page_result = {
+                'status_code': page_data['status_code'],
+                'url': url
+            }
+
+            if page_data['status_code'] == 200:
+                raw_tags = self.extractor.work(page_data['html'], start_url)
+                # TODO: use set to check if url should be checked
+                new_url_set.update(raw_tags['a'])
+                page_result.update(self.analyzer.work(raw_tags))
+
+            result_data.append(page_result)
+            page_done_count += 1
+            if page_done_count == page_limit:
+                break
+
+        return result_data
 
     def finish_task(self, channel, task_data, result_data):
-        # task_data = {"audit_id": 1, "main_url": "http://python.org", "url_list": ["http://python.org"]}
-        # result_data = {'title': [1110], 'description': None, 'keywords': [1151], 'h1': [1161], 'h2': None, 'h3': [1180]}
-        task_data.pop('url_list')
+        # audit_results = {"audit_id": 1,
+        #                  "main_url": "http://python.org",
+        #                  "page_data": [%dict with page results%]
+        #                  }
         result_data.update(task_data)
         final_message = rabbitpy.Message(
             channel=channel,
