@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My audits</title>
+</head>
+<body>
+    <h1 align="center">Hello, {{ user }}. Your audits here</h1>
+    <table border="1" cellpadding="20" align="center" width="50%">
+        <tr>
+            <th>№</th>
+            <th>Main url</th>
+        </tr>
+            {% for audit in audits %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <a href="{% url 'my_audits' %}">{{ audit.main_url }}</a>
+                        </td>
+                    </tr>
+            {% endfor %}
+    </table>
+</body>
+</html>
