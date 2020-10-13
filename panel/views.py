@@ -63,6 +63,6 @@ def registration(request):
             if password == confirm_password:
                 user = User.objects.create_user(username, email, password)
                 user.save()
-                return render(request, 'panel/index.html')
+                return render(request, 'panel/login_page.html')
 
     return render(request, template, context=context)
