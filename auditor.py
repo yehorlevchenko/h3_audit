@@ -30,13 +30,15 @@ class Auditor:
         page_done_count = 0
         start_url = audit_data['main_url']
         result_data = list()
-        new_url_set = {start_url}
+        url_set = {start_url}
+        url_queue = SimpleQueue()
 
         if not start_url.endswith('/'):
             start_url = f'{start_url}/'
 
-        # TODO: switch to Queue
-        for url in new_url_set:
+        while not url_queue.empty():
+
+            url = url_queue.get()
             page_data = self.getter.work(url)
             page_result = {
                 'status_code': page_data['status_code'],
@@ -45,8 +47,14 @@ class Auditor:
 
             if page_data['status_code'] == 200:
                 raw_tags = self.extractor.work(page_data['html'], start_url)
-                # TODO: use set to check if url should be checked
-                new_url_set.update(raw_tags['a'])
+
+                # Extracting new unique urls
+                new_url_set = raw_tags['a'].difference(url_set)
+
+                for new_url in new_url_set:
+                    url_queue.put(new_url)
+                url_set.update(new_url_set)
+
                 page_result.update(self.analyzer.work(raw_tags))
 
             result_data.append(page_result)
