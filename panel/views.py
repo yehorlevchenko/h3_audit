@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 
-from .models import Audit
+from .models import Audit, Result
 from .forms import LoginForm, RegisterForm
 
 
@@ -45,6 +45,7 @@ def login_page(request):
     else:
         return render(request, template, context=context)
 
+
 def register(request):
     context = {}
     template = 'panel/register.html'
@@ -70,4 +71,13 @@ def register(request):
             return render(request, template, context)
 
 
+def dynamic_audit_results(request, audit_id):
+    template = 'panel/audit_results.html'
 
+    if request.user.is_authenticated:
+        audit_results = Result.objects.filter(audit_id=audit_id, audit_id__owner_id=request.user.id)
+        context = {'audit_results': audit_results}
+
+        return render(request, template, context)
+    else:
+        return redirect('login_page')

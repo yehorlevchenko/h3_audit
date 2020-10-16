@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My audits</title>
+    <title>Audit Results</title>
 </head>
 <body>
-    <h1 align="center">Hello, {{ user }}. Your audits here</h1>
+    <h1 align="center">Audit Results</h1>
     <table border="1" cellpadding="20" align="center" width="50%">
         <tr>
             <th>№</th>
-            <th>Main url</th>
+            <th>Page url</th>
+            <th>Results</th>
         </tr>
-            {% for audit in audits %}
+            {% for line in audit_results %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>
-                            <a href="{% url 'audit_results' audit.id %}">{{ audit.main_url }}</a>
-                        </td>
+                        <td>{{ line.page_url }}</td>
+                        <td>{{ line.error_list }}</td>
                     </tr>
             {% endfor %}
     </table>
