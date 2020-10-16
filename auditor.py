@@ -46,7 +46,7 @@ class Auditor:
 
             if page_data['status_code'] == 200:
                 raw_tags = self.extractor.work(page_data['html'], start_url)
-                url_set = {raw_tags['a']} - new_url_set
+                url_set = set(raw_tags['a']) - new_url_set
 
                 for url in url_set:
                     url_queue.put(url)
