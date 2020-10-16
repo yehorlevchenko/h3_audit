@@ -14,9 +14,15 @@
             {% for audit in audits %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>
-                            <a href="{% url 'my_audits' %}">{{ audit.main_url }}</a>
-                        </td>
+                        {% if audit.is_done %}
+                            <td>
+                                <a href="{% url 'audit_results' audit.id %}">{{ audit.main_url }}</a>
+                            </td>
+                        {% else %}
+                            <td>
+                                {{ audit.main_url }} — Not done yet. Please, wait
+                            </td>
+                        {% endif %}
                     </tr>
             {% endfor %}
     </table>
