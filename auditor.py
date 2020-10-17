@@ -12,6 +12,7 @@ class Auditor:
         self.getter = Getter()
         self.extractor = Extractor()
         self.analyzer = Analyzer()
+        self.queue = SimpleQueue()
 
     def run(self):
         with rabbitpy.Connection('amqp://localhost:5672') as connection:
@@ -28,15 +29,17 @@ class Auditor:
     def work(self, audit_data):
         page_limit = audit_data['limit']
         page_done_count = 0
-        start_url = audit_data['main_url']
         result_data = list()
-        new_url_set = {start_url}
+        start_url = audit_data['main_url']
 
         if not start_url.endswith('/'):
             start_url = f'{start_url}/'
 
-        # TODO: switch to Queue
-        for url in new_url_set:
+        url_set = {start_url}
+        self.queue.put(*url_set)
+
+        while not self.queue.empty():
+            url = self.queue.get()
             page_data = self.getter.work(url)
             page_result = {
                 'status_code': page_data['status_code'],
@@ -45,8 +48,10 @@ class Auditor:
 
             if page_data['status_code'] == 200:
                 raw_tags = self.extractor.work(page_data['html'], start_url)
-                # TODO: use set to check if url should be checked
-                new_url_set.update(raw_tags['a'])
+                new_url_set = raw_tags['a'].difference(url_set)
+                for url in new_url_set:
+                    self.queue.put(url)
+                url_set.update(new_url_set)
                 page_result.update(self.analyzer.work(raw_tags))
 
             result_data.append(page_result)
@@ -61,7 +66,6 @@ class Auditor:
         #                  "main_url": "http://python.org",
         #                  "page_data": [%dict with page results%]
         #                  }
-        result_data.update(task_data)
         final_message = rabbitpy.Message(
             channel=channel,
             body_value=result_data
