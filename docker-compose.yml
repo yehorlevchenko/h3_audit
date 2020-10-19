@@ -1,38 +1,26 @@
 version: '3.8'
-
 services:
-  rabbitmq:
-    image: rabbitmq:3-management
-    hostname: localhost
-    volumes:
-      - ./rabbitmq/data:/var/lib/rabbitmq/mnesia/rabbit@my-rabbit
-      - ./rabbitmq/logs:/var/log/rabbitmq/log
-    ports:
-      - 5672:5672
-      - 15672:15672
-  db:
-    image: postgres
-    container_name: db
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5433:5432"
-    networks:
-      - djangonetwork
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
+    env_file:
+      - dev.env
     volumes:
       - .:/code
     ports:
-      - "8000:8000"
+      - 8000:8000
     depends_on:
       - db
-    networks:
-      - djangonetwork
+    links:
+      - db
+  db:
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=audit
 
-networks:
-    djangonetwork:
-        driver: bridge
+volumes:
+  postgres_data:
