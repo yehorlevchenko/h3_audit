@@ -14,3 +14,8 @@ class RegisterForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2')
+
+
+class NewAuditForm(forms.Form):
+    main_url = forms.CharField(label='main url', widget=forms.URLInput)
+    limit = forms.IntegerField(label="page limit")

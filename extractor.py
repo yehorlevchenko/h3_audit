@@ -21,7 +21,7 @@ class Extractor:
         Collects all node lists to dict
         :return:dict(list(str))
         """
-        soup = BeautifulSoup(raw_html, 'lxml')
+        soup = BeautifulSoup(raw_html, "html.parser")
         result = dict()
         for tag, tag_value in self.tag_dict.items():
             extract_tags = soup.find_all(tag_value)
@@ -60,4 +60,4 @@ if __name__ == "__main__":
     response = requests.get('https://www.python.org', headers=headers)
     # print(response.text)
     extractor = Extractor()
-    print(extractor.work(response.text))
+    print(extractor.work(response.text, 'https://www.python.org'))
