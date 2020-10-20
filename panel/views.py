@@ -4,8 +4,9 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 
 from .models import Audit, AuditResults, Check
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm, NewAuditForm
 
+import rabbitpy
 
 def index(request):
     """
@@ -26,6 +27,28 @@ def my_audits(request):
         return render(request, template, context)
     else:
         return redirect('login_page')
+
+
+def new_audit(request):
+    template = 'panel/new_audit.html'
+    context = {'form': NewAuditForm}
+
+    if not request.user.is_authenticated:
+        return redirect('login_page')
+
+    if request.method == "POST":
+        form = NewAuditForm(request.POST)
+        if not form.is_valid():
+            return redirect('new_audit')
+        new_audit = Audit(main_url=request.POST['main_url'],
+                          owner_id=request.user)
+        new_audit.save()
+        _post_new_audit({"audit_id": new_audit.id,
+                         "main_url": new_audit.main_url,
+                         "limit": 50})
+        return redirect('my_audits')
+    else:
+        return render(request, template, context=context)
 
 
 def login_page(request):
@@ -93,6 +116,18 @@ def audit_results(request, audit_id):
     else:
         return redirect('login_page')
 
+def _post_new_audit(result_data):
+    # audit_results = {"audit_id": 1,
+    #                  "main_url": "http://python.org",
+    #                  "page_data": [%dict with page results%]
+    #                  }
+    with rabbitpy.Connection('amqp://localhost:5672') as connection:
+        with connection.channel() as channel:
+            final_message = rabbitpy.Message(
+                channel=channel,
+                body_value=result_data
+            )
+            final_message.publish(exchange="audit", routing_key="audit_start")
 
 
-
+curl -u guest:guest -H "content-type:application/json" -X POST -d'{"properties":{"delivery_mode":2},"routing_key":"audit_start","payload":"TEST","payload_encoding":"string"}' http://localhost:15672/api/exchanges/%2f/amq.default/publish

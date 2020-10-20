@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form method="post" action="{% url 'new_audit' %}">
+    {% csrf_token %}
+    {{ form.main_url.label_tag }}
+    {{ form.main_url }}<br/>
+    {{ form.limit.label_tag }}
+    {{ form.limit }}<br/>
+    <input type="submit" value="new_audit" />
+    </form>
+</body>
+</html>
