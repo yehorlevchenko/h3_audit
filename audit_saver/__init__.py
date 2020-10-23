@@ -10,7 +10,7 @@ class AuditSaver:
         pass
 
     def run(self):
-        with rabbitpy.Connection('amqp://localhost:5672') as connection:
+        with rabbitpy.Connection('amqp://rabbitmq:5672') as connection:
             with connection.channel() as channel:
                 queue = rabbitpy.Queue(channel, 'audit_finish')
                 for message in queue.consume():
@@ -34,13 +34,7 @@ class AuditSaver:
 
 
 if __name__ == '__main__':
-    test_data = {"audit_id": 1,
-                 "main_url": 'http://python.org',
-                 'title': [1110],
-                 'description': [],
-                 'keywords': [1151],
-                 'h1': [1161],
-                 'h2': [],
-                 'h3': [1180]}
+    from time import sleep
     saver = AuditSaver()
-    saver.save_data(test_data)
+    sleep(30)
+    saver.run()
