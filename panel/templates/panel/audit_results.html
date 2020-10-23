@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Audit results</title>
+    <style>
+        div {
+        overflow: auto;
+        height: 50px;
+        width: 550px;
+        }
+    </style>
+</head>
+<body>
+    <h1 align="center">Results for {{ audit_obj.main_url }}</h1>
+    <table border="1" cellpadding="20" align="center" width="60%">
+            {% for group_name in checks_group_name %}
+                <tr>
+                    <td colspan="2" bgcolor="grey"><font color="white">{{ group_name.capitalize }} Errors</font></td>
+                </tr>
+                <tr>
+                {% for check in checks %}
+                    {% if check.group_name == group_name %}
+                            <td>{{ check.name_error }}</br>
+                            <small style="color:grey;"> {{ check.description_error }}</small>
+                            </td>
+                            {% for code_error, result in audit_results.items %}
+                                {% if check.code_error == code_error %}
+                                        <td>
+                                            <div>
+                                        {% for url in result %}
+                                            {{url.url}}</br>
+                                        {% endfor %}
+                                            </div>
+                                        </td>
+                                {% endif %}
+                            {% endfor %}
+                </tr>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+    </table>
+</body>
+</html>
