@@ -1,5 +1,5 @@
 import psycopg2
-from psycopg2.extras import RealDictCursor
+from psycopg2.extras import RealDictCursor, execute_values
 import rabbitpy
 import json
 import pkgutil
@@ -15,14 +15,27 @@ class AuditSaver:
                 queue = rabbitpy.Queue(channel, 'audit_finish')
                 for message in queue.consume():
                     audit_results = json.loads(message.body.decode('utf8'))
-                    self.save_data(audit_results)
+                    try:
+                        print(f"Got audit results {audit_results}")
+                        self.save_data(audit_results)
+                    except Exception as e:
+                        print(e)
                     message.ack()
 
     def save_data(self, audit_results):
-        query = pkgutil.get_data('audit_saver', 'data/insert_audit_result.sql')
-        if not query:
-            raise RuntimeError('Failed to find insert_audit_result query')
-
+        query = """
+        INSERT INTO panel_auditresults (url,
+                                audit_id,
+                                title_error,
+                                description_error,
+                                keywords_error,
+                                h1_error,
+                                h2_error,
+                                h3_error,
+                                status_code)
+        VALUES %s;
+        """
+        print(f"Saving audit results: {audit_results}")
         with psycopg2.connect(dbname="audit",
                               user="postgres",
                               host="db",
@@ -30,7 +43,7 @@ class AuditSaver:
                               password="postgres",
                               cursor_factory=RealDictCursor) as connection:
             with connection.cursor() as cursor:
-                cursor.execute(query, audit_results)
+                execute_values(cursor, query, audit_results)
 
 
 if __name__ == '__main__':

@@ -37,8 +37,13 @@ class Check(models.Model):
 class AuditResults(models.Model):
     url = models.URLField(name='url', max_length=2040, null=False)
     audit_id = models.ForeignKey(Audit, on_delete=models.DO_NOTHING)
-    code_error = models.IntegerField(name='code_error')
+    title_error = models.BinaryField(name='title errors')
+    description_error = models.BinaryField(name='description errors')
+    keywords_error = models.BinaryField(name='keywords errors')
+    h1_error = models.BinaryField(name='h1 errors')
+    h2_error = models.BinaryField(name='h2 errors')
+    h3_error = models.BinaryField(name='h3 errors')
     status_code = models.IntegerField(name='status_code', default=0, null=False)
 
     def __str__(self):
-        return f'{self.url} => {self.status_code} => {self.code_error} => {self.audit_id}'
+        return f'{self.url} => {self.status_code} => {self.audit_id}'

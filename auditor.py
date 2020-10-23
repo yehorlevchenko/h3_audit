@@ -27,8 +27,9 @@ class Auditor:
                 in_data = json.loads(message.body.decode('utf8'))
                 try:
                     result = self.work(in_data)
-                    self.finish_task(self.channel, in_data, result)
-                except Exception:
+                    self.finish_task(self.channel, result)
+                except Exception as e:
+                    print(e)
                     pass
                 message.ack()
 
@@ -62,7 +63,8 @@ class Auditor:
             page_data = self.getter.work(url)
             page_result = {
                 'status_code': page_data['status_code'],
-                'url': url
+                'url': url,
+                'audit_id': audit_data['audit_id']
             }
 
             if page_data['status_code'] == 200:
@@ -80,11 +82,12 @@ class Auditor:
 
         return result_data
 
-    def finish_task(self, channel, task_data, result_data):
+    def finish_task(self, channel, result_data):
         # audit_results = {"audit_id": 1,
         #                  "main_url": "http://python.org",
         #                  "page_data": [%dict with page results%]
         #                  }
+        print(f"Auditor task finished: {result_data}")
         final_message = rabbitpy.Message(
             channel=channel,
             body_value=result_data

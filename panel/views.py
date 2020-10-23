@@ -48,7 +48,7 @@ def new_audit(request):
         new_audit.save()
         _post_new_audit({"audit_id": new_audit.id,
                          "main_url": new_audit.main_url,
-                         "limit": 50})
+                         "limit": 3})
         return redirect('my_audits')
     else:
         return render(request, template, context=context)

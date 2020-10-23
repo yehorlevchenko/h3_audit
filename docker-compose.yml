@@ -33,6 +33,7 @@ services:
     command: python ./audit_saver/__init__.py
     links:
       - rabbitmq
+      - db
   db:
     image: postgres
     volumes:
