@@ -1,6 +1,7 @@
 import rabbitpy
 import json
 from queue import SimpleQueue
+from time import sleep
 
 from getter import Getter
 from extractor import Extractor
@@ -13,18 +14,33 @@ class Auditor:
         self.extractor = Extractor()
         self.analyzer = Analyzer()
         self.queue = SimpleQueue()
+        self.connection = None
+        self.channel = None
 
     def run(self):
-        with rabbitpy.Connection('amqp://localhost:5672') as connection:
-            with connection.channel() as channel:
-                queue = rabbitpy.Queue(channel, 'audit_start')
-                for message in queue.consume():
-                    # TODO: add try\except and publosh broken messages to
-                    #  audit_error queue
-                    in_data = json.loads(message.body.decode('utf8'))
-                    result = self.work(in_data)
-                    self.finish_task(channel, in_data, result)
-                    message.ack()
+        if self._connect():
+            self.channel = self.connection.channel()
+            queue = rabbitpy.Queue(self.channel, 'audit_start')
+            for message in queue.consume():
+                # TODO: add try\except and publosh broken messages to
+                #  audit_error queue
+                in_data = json.loads(message.body.decode('utf8'))
+                result = self.work(in_data)
+                self.finish_task(self.channel, in_data, result)
+                message.ack()
+
+    def _connect(self):
+        attempts = 5
+        for attempt in range(1, attempts + 1):
+            try:
+                self.connection = rabbitpy.Connection('amqp://rabbitmq:5672')
+            except Exception:
+                if attempt == 5:
+                    return False
+                else:
+                    sleep(15)
+
+        return True
 
     def work(self, audit_data):
         page_limit = audit_data['limit']
@@ -76,7 +92,6 @@ class Auditor:
 
 if __name__ == '__main__':
     a = Auditor()
-    # a.work("http://python.org")
     a.run()
 
 

@@ -128,6 +128,3 @@ def _post_new_audit(result_data):
                 body_value=result_data
             )
             final_message.publish(exchange="audit", routing_key="audit_start")
-
-
-curl -u guest:guest -H "content-type:application/json" -X POST -d'{"properties":{"delivery_mode":2},"routing_key":"audit_start","payload":"TEST","payload_encoding":"string"}' http://localhost:15672/api/exchanges/%2f/amq.default/publish
