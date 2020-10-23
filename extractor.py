@@ -40,15 +40,32 @@ class Extractor:
         # whitelist = ['/', './', 'https://', 'http://']
         pattern = '(^\.\/)|(^\/(?!\/))|(^http:\/\/(?!\/)|https:\/\/(?!\/))|(^w{3}\.)'
         for tag in a_list:
-            href = tag.get('href')
-            check = re.match(pattern, href)
+            try:
+                href = tag.get('href')
+                check = re.match(pattern, href)
+            except TypeError:
+                continue
             if check:
                 if check.groups():
                     url = tag.get('href')
-                    if not any((url.startswith('www'), url.startswith('http'))):
-                        # TODO: add case when url starts with ./
-                        url = f'{base_url}{url}'
-                    unique_a.add(url)
+                    if url.startswith('/'):
+                        #Take relative links starting with / and add a base url to them
+                        url = f'{base_url}{url[1:]}'
+                        unique_a.add(url)
+
+                    elif url.startswith('./'):
+                        #Take relative links starting with ./ and add a base url to them
+                        url = f"{base_url}{url[2:]}"
+                        unique_a.add(url)
+
+                    elif url.startswith('http') and not url.startswith(base_url):
+                        #Skip links that start with http and do NOT start with the base url.
+                        # So these are external links or subdomain links
+                        continue
+
+                    else:
+                        #Links that start with http, www and which are internal links will go here
+                        unique_a.add(url)
         return unique_a
 
 
@@ -58,6 +75,4 @@ if __name__ == "__main__":
                    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
                    '(KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36'}
     response = requests.get('https://www.python.org', headers=headers)
-    # print(response.text)
     extractor = Extractor()
-    print(extractor.work(response.text, 'https://www.python.org'))
