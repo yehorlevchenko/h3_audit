@@ -2,6 +2,9 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
+import json
+import requests
+from requests.auth import HTTPBasicAuth
 
 from .models import Audit, AuditResults, Check
 from .forms import LoginForm, RegisterForm, NewAuditForm
@@ -117,14 +120,12 @@ def audit_results(request, audit_id):
         return redirect('login_page')
 
 def _post_new_audit(result_data):
-    # audit_results = {"audit_id": 1,
-    #                  "main_url": "http://python.org",
-    #                  "page_data": [%dict with page results%]
-    #                  }
-    with rabbitpy.Connection('amqp://localhost:5672') as connection:
-        with connection.channel() as channel:
-            final_message = rabbitpy.Message(
-                channel=channel,
-                body_value=result_data
-            )
-            final_message.publish(exchange="audit", routing_key="audit_start")
+    url = "http://rabbitmq:15672/api/exchanges/%2f/amq.default/publish"
+    body = {"properties": {"delivery_mode": 2},
+            "routing_key": "audit_start",
+            "payload": json.dumps(result_data),
+            "payload_encoding": "string"}
+    r = requests.post(url, data=json.dumps(body),
+                      auth=HTTPBasicAuth('guest', 'guest'))
+    print(r.status_code)
+    print(r.text)

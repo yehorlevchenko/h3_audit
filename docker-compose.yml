@@ -22,6 +22,7 @@ services:
       - db
     links:
       - db
+      - rabbitmq
   auditor:
     build: .
     command: python auditor.py

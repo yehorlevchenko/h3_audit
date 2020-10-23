@@ -25,8 +25,11 @@ class Auditor:
                 # TODO: add try\except and publosh broken messages to
                 #  audit_error queue
                 in_data = json.loads(message.body.decode('utf8'))
-                result = self.work(in_data)
-                self.finish_task(self.channel, in_data, result)
+                try:
+                    result = self.work(in_data)
+                    self.finish_task(self.channel, in_data, result)
+                except Exception:
+                    pass
                 message.ack()
 
     def _connect(self):

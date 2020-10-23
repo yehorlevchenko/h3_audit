@@ -8,7 +8,7 @@
     {{ user }}
     {% if user.is_authenticated %}
         <ul>
-            <li><a href="{% url 'index' %}">Create new audit</a></li>
+            <li><a href="{% url 'new_audit' %}">Create new audit</a></li>
             <li><a href="{% url 'my_audits' %}">My audits</a></li>
         </ul>
     {% else %}
