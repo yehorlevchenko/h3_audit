@@ -18,6 +18,9 @@ class Auditor:
         self.channel = None
 
     def run(self):
+        """
+        Main cycle of the class.
+        """
         if self._connect():
             self.channel = self.connection.channel()
             queue = rabbitpy.Queue(self.channel, 'audit_start')
@@ -27,26 +30,40 @@ class Auditor:
                 in_data = json.loads(message.body.decode('utf8'))
                 try:
                     result = self.work(in_data)
-                    self.finish_task(self.channel, result)
+                    self.finish_task(result)
                 except Exception as e:
-                    print(e)
+                    print(str(e))
                     pass
                 message.ack()
 
     def _connect(self):
+        """
+        Connector - validator.
+        :return: True if connected, False if connection attempts > 5
+        """
         attempts = 5
         for attempt in range(1, attempts + 1):
             try:
                 self.connection = rabbitpy.Connection('amqp://rabbitmq:5672')
+                # self.connection = rabbitpy.Connection('amqp://0.0.0.0:5672')
+                print("Successfully connected to RabbitMQ ...")
+                break
             except Exception:
                 if attempt == 5:
                     return False
                 else:
-                    sleep(15)
+                    idle_time = 10
+                    print(f"Connection failed. "
+                          f"Retrying in {idle_time} secs ...")
+                    sleep(idle_time)
 
         return True
 
     def work(self, audit_data):
+        """
+        :param audit_data: dict with audit_id, main_url, limit of pages
+        :return: list with audit result data for each page in list()
+        """
         page_limit = audit_data['limit']
         page_done_count = 0
         result_data = list()
@@ -61,11 +78,6 @@ class Auditor:
         while not self.queue.empty():
             url = self.queue.get()
             page_data = self.getter.work(url)
-            page_result = {
-                'status_code': page_data['status_code'],
-                'url': url,
-                'audit_id': audit_data['audit_id']
-            }
 
             if page_data['status_code'] == 200:
                 raw_tags = self.extractor.work(page_data['html'], start_url)
@@ -73,27 +85,35 @@ class Auditor:
                 for url in new_url_set:
                     self.queue.put(url)
                 url_set.update(new_url_set)
-                page_result.update(self.analyzer.work(raw_tags))
+                tag_errors = self.analyzer.work(raw_tags)
+
+                page_result = [url, audit_data['audit_id'],
+                               tag_errors['title'],
+                               tag_errors['description'],
+                               tag_errors['keywords'],
+                               tag_errors['h1'],
+                               tag_errors['h2'],
+                               tag_errors['h3'],
+                               page_data['status_code']]
 
             result_data.append(page_result)
             page_done_count += 1
             if page_done_count == page_limit:
                 break
-
         return result_data
 
-    def finish_task(self, channel, result_data):
-        # audit_results = {"audit_id": 1,
-        #                  "main_url": "http://python.org",
-        #                  "page_data": [%dict with page results%]
-        #                  }
+    def finish_task(self, result_data):
+        """
+        Publishes audit result data to RabbitMQ queue
+        :param result_data: audit result dict
+        """
+
         print(f"Auditor task finished: {result_data}")
         final_message = rabbitpy.Message(
-            channel=channel,
+            channel=self.channel,
             body_value=result_data
         )
         final_message.publish(exchange="audit", routing_key="audit_finish")
-
 
 
 if __name__ == '__main__':
