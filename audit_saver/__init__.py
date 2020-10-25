@@ -25,15 +25,15 @@ class AuditSaver:
     def save_data(self, audit_results):
         query = """
         INSERT INTO panel_auditresults (url,
-                                audit_id,
-                                title_error,
-                                description_error,
-                                keywords_error,
-                                h1_error,
-                                h2_error,
-                                h3_error,
+                                audit_id_id,
+                                title_errors,
+                                description_errors,
+                                keywords_errors,
+                                h1_errors,
+                                h2_errors,
+                                h3_errors,
                                 status_code)
-        VALUES %s;
+        VALUES %s;  
         """
         print(f"Saving audit results: {audit_results}")
         with psycopg2.connect(dbname="audit",
@@ -43,7 +43,9 @@ class AuditSaver:
                               password="postgres",
                               cursor_factory=RealDictCursor) as connection:
             with connection.cursor() as cursor:
-                execute_values(cursor, query, audit_results)
+                to_tuple = tuple(i for i in audit_results)
+                execute_values(cursor, query, to_tuple)
+        print("Successfully saved")
 
 
 if __name__ == '__main__':
