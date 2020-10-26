@@ -25,17 +25,23 @@ class AuditSaver:
     def save_data(self, audit_results):
         query = """
         INSERT INTO panel_auditresults (url,
-                                audit_id,
-                                title_error,
-                                description_error,
-                                keywords_error,
-                                h1_error,
-                                h2_error,
-                                h3_error,
+                                audit_id_id,
+                                title_errors,
+                                description_errors,
+                                keywords_errors,
+                                h1_errors,
+                                h2_errors,
+                                h3_errors,
                                 status_code)
         VALUES %s;
         """
         print(f"Saving audit results: {audit_results}")
+        template = """(%(url)s, %(audit_id)s, %(title)s,
+         %(description)s, %(keywords)s, %(h1)s, %(h2)s, 
+         %(h3)s, %(status_code)s)"""
+        audit_update_is_done_query = """UPDATE panel_audit
+                            SET is_done = True
+                            WHERE id = {};""".format(audit_results[0]['audit_id'])
         with psycopg2.connect(dbname="audit",
                               user="postgres",
                               host="db",
@@ -43,7 +49,9 @@ class AuditSaver:
                               password="postgres",
                               cursor_factory=RealDictCursor) as connection:
             with connection.cursor() as cursor:
-                execute_values(cursor, query, audit_results)
+                execute_values(cursor, query, audit_results,
+                               template=template)
+                cursor.execute(audit_update_is_done_query)
 
 
 if __name__ == '__main__':
