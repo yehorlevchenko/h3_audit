@@ -13,7 +13,6 @@ class Auditor:
         self.getter = Getter()
         self.extractor = Extractor()
         self.analyzer = Analyzer()
-        self.queue = SimpleQueue()
         self.connection = None
         self.channel = None
 
@@ -56,10 +55,11 @@ class Auditor:
             start_url = f'{start_url}/'
 
         url_set = {start_url}
-        self.queue.put(*url_set)
+        queue = SimpleQueue()
+        queue.put(*url_set)
 
-        while not self.queue.empty():
-            url = self.queue.get()
+        while not queue.empty():
+            url = queue.get()
             page_data = self.getter.work(url)
             page_result = {
                 'status_code': page_data['status_code'],
@@ -71,7 +71,7 @@ class Auditor:
                 raw_tags = self.extractor.work(page_data['html'], start_url)
                 new_url_set = raw_tags['a'].difference(url_set)
                 for url in new_url_set:
-                    self.queue.put(url)
+                    queue.put(url)
                 url_set.update(new_url_set)
                 page_result.update(self.analyzer.work(raw_tags))
 
@@ -79,7 +79,6 @@ class Auditor:
             page_done_count += 1
             if page_done_count == page_limit:
                 break
-
         return result_data
 
     def finish_task(self, channel, result_data):

@@ -44,11 +44,12 @@ def new_audit(request):
         if not form.is_valid():
             return redirect('new_audit')
         new_audit = Audit(main_url=request.POST['main_url'],
-                          owner_id=request.user)
+                          owner_id=request.user,
+                          limit=int(request.POST['limit']))
         new_audit.save()
         _post_new_audit({"audit_id": new_audit.id,
                          "main_url": new_audit.main_url,
-                         "limit": 3})
+                         "limit": new_audit.limit})
         return redirect('my_audits')
     else:
         return render(request, template, context=context)
