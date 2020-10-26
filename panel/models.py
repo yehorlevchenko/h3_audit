@@ -8,6 +8,7 @@ class Audit(models.Model):
     owner_id = models.ForeignKey(settings.AUTH_USER_MODEL,
                                  on_delete=models.DO_NOTHING)
     is_done = models.BooleanField(name='is_done', default=False, null=False)
+    limit = models.IntegerField(name='limit', null=False, default=1)
 
     def __str__(self):
         return f'{self.main_url} => {self.owner_id}'
@@ -37,12 +38,15 @@ class Check(models.Model):
 class AuditResults(models.Model):
     url = models.URLField(name='url', max_length=2040, null=False)
     audit_id = models.ForeignKey(Audit, on_delete=models.DO_NOTHING)
-    title_error = models.BinaryField(name='title errors')
-    description_error = models.BinaryField(name='description errors')
-    keywords_error = models.BinaryField(name='keywords errors')
-    h1_error = models.BinaryField(name='h1 errors')
-    h2_error = models.BinaryField(name='h2 errors')
-    h3_error = models.BinaryField(name='h3 errors')
+    title_error = models.CharField(name='title_errors', null=True,
+                                   max_length=256)
+    description_error = models.CharField(name='description_errors', null=True,
+                                         max_length=256)
+    keywords_error = models.CharField(name='keywords_errors', null=True,
+                                      max_length=256)
+    h1_error = models.CharField(name='h1_errors', null=True, max_length=256)
+    h2_error = models.CharField(name='h2_errors', null=True, max_length=256)
+    h3_error = models.CharField(name='h3_errors', null=True, max_length=256)
     status_code = models.IntegerField(name='status_code', default=0, null=False)
 
     def __str__(self):
