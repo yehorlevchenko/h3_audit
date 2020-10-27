@@ -6,7 +6,7 @@
     <style>
         div {
         overflow: auto;
-        height: 50px;
+        height: 100px;
         width: 550px;
         }
     </style>
@@ -24,17 +24,15 @@
                             <td>{{ check.name_error }}</br>
                             <small style="color:grey;"> {{ check.description_error }}</small>
                             </td>
-                            {% for code_error, result in audit_results.items %}
-                                {% if check.code_error == code_error %}
-                                        <td>
-                                            <div>
-                                        {% for url in result %}
-                                            {{url.url}}</br>
-                                        {% endfor %}
-                                            </div>
-                                        </td>
-                                {% endif %}
-                            {% endfor %}
+                            <td>
+                                <div>
+                                    {% for result in audit_results %}
+                                        {% if check.code_error in result.get_errors_list %}
+                                            {{ result.url }}</br>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </td>
                 </tr>
                     {% endif %}
                 {% endfor %}
