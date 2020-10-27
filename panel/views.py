@@ -44,11 +44,12 @@ def new_audit(request):
         if not form.is_valid():
             return redirect('new_audit')
         new_audit = Audit(main_url=request.POST['main_url'],
-                          owner_id=request.user)
+                          owner_id=request.user,
+                          limit=int(request.POST['limit']))
         new_audit.save()
         _post_new_audit({"audit_id": new_audit.id,
                          "main_url": new_audit.main_url,
-                         "limit": 3})
+                         "limit": new_audit.limit})
         return redirect('my_audits')
     else:
         return render(request, template, context=context)
@@ -104,15 +105,8 @@ def audit_results(request, audit_id):
     context = {'checks': checks, 'checks_group_name': checks_group_name, 'audit_obj': audit_obj}
     if request.user.is_authenticated:
         if request.user.id == audit_obj.owner_id_id:
-            urls_by_checks = dict()
             audit_results = AuditResults.objects.filter(audit_id=audit_id)
-            for check in checks:
-                results = list()
-                for url_result in audit_results:
-                    if check.code_error == url_result.code_error:
-                        results.append(url_result)
-                urls_by_checks[check.code_error] = results
-            context.update({'audit_results': urls_by_checks})
+            context.update({'audit_results': audit_results})
             return render(request, template, context)
         else:
             return redirect('my_audits')
