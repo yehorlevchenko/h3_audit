@@ -105,15 +105,8 @@ def audit_results(request, audit_id):
     context = {'checks': checks, 'checks_group_name': checks_group_name, 'audit_obj': audit_obj}
     if request.user.is_authenticated:
         if request.user.id == audit_obj.owner_id_id:
-            urls_by_checks = dict()
             audit_results = AuditResults.objects.filter(audit_id=audit_id)
-            for check in checks:
-                results = list()
-                for url_result in audit_results:
-                    if check.code_error == url_result.code_error:
-                        results.append(url_result)
-                urls_by_checks[check.code_error] = results
-            context.update({'audit_results': urls_by_checks})
+            context.update({'audit_results': audit_results})
             return render(request, template, context)
         else:
             return redirect('my_audits')
