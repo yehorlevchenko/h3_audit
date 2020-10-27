@@ -49,5 +49,16 @@ class AuditResults(models.Model):
     h3_error = models.CharField(name='h3_errors', null=True, max_length=256)
     status_code = models.IntegerField(name='status_code', default=0, null=False)
 
+    def get_errors_list(self):
+        tags = ['title', 'description', 'keywords', 'h1', 'h2', 'h3']
+        errors = []
+        for tag in tags:
+            errors_str = getattr(self, f'{tag}_errors')
+            if errors_str:
+                errors_list = [int(error) for error in
+                               errors_str[1:-1].split(',')]
+                errors.extend(errors_list)
+        return errors
+
     def __str__(self):
         return f'{self.url} => {self.status_code} => {self.audit_id}'
